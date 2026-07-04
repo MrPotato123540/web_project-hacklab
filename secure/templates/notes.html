@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Markdown Notes</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+</head>
+<body class="notes-page">
+
+	<div class="notes-layout">
+		<!-- Sidebar -->
+		<aside class="notes-sidebar">
+			<div class="sidebar-header">
+				<span class="sidebar-icon">File</span>
+				<h2>Categories</h2>
+			</div>
+
+			<nav class="category-nav">
+				<a href="{{ url_for('list_notes') }}" class="category-item {% if not request.args.get('category') %}active{% endif %}">
+					<span class="cat-label">All Notes</span>
+					<span class="cat-count">{{ notes|length if not request.args.get('category') else '' }}</span>
+				</a>
+
+				{% for cat in categories %}
+				<a href="{{ url_for('list_notes', category=cat[0]) }}" class="category-item {% if request.args.get('category') == cat[0] %}active{% endif %}">
+					<span class="cat-icon">
+						{%- if cat[0] == 'psychology' -%}
+						{%- elif cat[0] == 'geometry' -%}
+						{%- elif cat[0] == 'general' -%}
+						{%- else -%}
+						{%- endif -%}
+					</span>
+					<span class="cat-label">{{ cat[0]|capitalize }}</span>
+				</a>
+				{% endfor %}
+			</nav>
+
+			<div class="sidebar-footer">
+				<a href="{{ url_for('change_password') }}" class="back-link">Settings</a>
+				<a href="{{ url_for('logout') }}" class="back-link" style="color:#ff6666;">Logout ({{ session.get('username', 'Guest') }})</a>
+				<a href="{{ url_for('welcome') }}" class="back-link">← Main Page</a>
+			</div>
+		</aside>
+
+		<!-- Main Content -->
+		<main class="notes-main">
+			<div class="notes-header">
+				<div style="display:flex;justify-content:space-between;align-items:center;">
+					<div>
+						<h1>
+							{% if request.args.get('category') %}
+								{{ request.args.get('category')|capitalize }}
+							{% else %}
+								All Notes
+							{% endif %}
+						</h1>
+						<p class="notes-subtitle">{{ notes|length }} note founded.</p>
+					</div>
+					<button onclick="document.getElementById('add-note-form').style.display = document.getElementById('add-note-form').style.display === 'none' ? 'block' : 'none'" style="background:#238636;color:white;border:none;padding:8px 16px;border-radius:6px;font-family:monospace;font-size:13px;cursor:pointer;">+ Add Note</button>
+				</div>
+			</div>
+
+			<!-- Add Note Form (hidden by default) -->
+			<div id="add-note-form" style="display:none;background:#161b22;border:1px solid #21262d;border-radius:10px;padding:20px;margin-bottom:16px;">
+				<form method="POST" action="{{ url_for('add_note') }}" style="display:flex;flex-direction:column;gap:10px;">
+					<input type="text" name="title" placeholder="Note title" required style="padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;color:#e6edf3;font-family:monospace;font-size:13px;">
+					<input type="text" name="category" placeholder="Category" value="general" style="padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;color:#e6edf3;font-family:monospace;font-size:13px;">
+					<textarea name="content" placeholder="Note content (markdown supported)" rows="4" required style="padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;color:#e6edf3;font-family:monospace;font-size:13px;resize:vertical;"></textarea>
+					<button type="submit" style="background:#238636;color:white;border:none;padding:10px;border-radius:6px;font-family:monospace;cursor:pointer;">Save Note</button>
+				</form>
+			</div>
+
+			{% if notes %}
+			<div class="notes-grid">
+				{% for note in notes %}
+				<a href="{{ url_for('view_note', note_id=note.id) }}" class="note-card">
+					<div class="note-card-header">
+						<span class="note-category-badge">{{ note.category }}</span>
+						<span class="note-date">{{ note.created_at.strftime('%d %b %Y') if note.created_at else '' }}</span>
+					</div>
+					<h3 class="note-title">{{ note.title }}</h3>
+					<p class="note-preview">{{ note.content[:120] }}{% if note.content|length > 120 %}…{% endif %}</p>
+					<div class="note-card-footer">
+						<span class="read-more">Reading -></span>
+						<form method="POST" action="{{ url_for('delete_note', note_id=note.id) }}" style="margin:0;" onsubmit="return confirm('Delete this note?');">
+							<button type="submit" style="background:none;border:none;color:#ff6666;font-family:monospace;font-size:11px;cursor:pointer;padding:0;">Delete</button>
+						</form>
+					</div>
+				</a>
+				{% endfor %}
+			</div>
+			{% else %}
+			<div class="empty-state">
+				<span class="empty-icon">📭</span>
+				<p>No notes in that category.</p>
+			</div>
+			{% endif %}
+		</main>
+	</div>
+
+</body>
+</html>

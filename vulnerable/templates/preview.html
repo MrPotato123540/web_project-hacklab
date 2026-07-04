@@ -1,0 +1,113 @@
+<!-- VULNERABLE: shows full response headers from the fetched URL
+     this leaks internal service information (server versions, internal IPs)
+     the secure version hides response headers -->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>URL Preview</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+	<div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+
+	<div class="sidebar collapsed" id="sidebar">
+		<br>
+		<ul>
+			<li><a href="{{ url_for('qr_home') }}">QR Generator</a></li>
+			<li><a href="{{ url_for('decode_qr') }}">Qr Decoder</a></li>
+			<li><a href="{{ url_for('list_notes') }}">Markdown Viewer</a></li>
+			<li><a href="{{ url_for('list_files') }}">Files</a></li>
+			<li><a href="{{ url_for('search') }}">Search</a></li>
+			<li><a href="{{ url_for('ping_tool') }}">Ping</a></li>
+			<li><a href="{{ url_for('preview_url') }}" class="active">URL Preview</a></li>
+		    <li style="margin-top:20px;border-top:1px solid #30363d;padding-top:12px;"><a href="{{ url_for('change_password') }}">Settings</a></li>
+		    <li><a href="{{ url_for('logout') }}" style="color:#ff6666;">Logout</a></li>
+		    <li style="color:#6ea8fe;font-size:12px;margin-top:10px;">{{ session.get('username', 'Guest') }}</li>
+		</ul>
+	</div>
+
+	<div class="main-content expanded" id="main">
+		<h2>URL Preview</h2>
+		<p style="color: #8b949e;">Enter a URL to fetch and preview its content.</p>
+
+		<!-- URL Form -->
+		<form method="POST" action="{{ url_for('preview_url') }}" style="margin-top: 1rem;">
+			<div style="display: flex; gap: 8px;">
+				<input 
+					type="text" 
+					name="url" 
+					value="{{ url or '' }}" 
+					placeholder="https://example.com"
+					style="flex:1; padding:10px 14px; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#e6edf3; font-family:monospace; font-size:14px;"
+				>
+				<button type="submit" style="padding:10px 20px; background:#238636; color:white; border:none; border-radius:6px; font-family:monospace; font-size:14px; cursor:pointer;">
+					Fetch
+				</button>
+			</div>
+		</form>
+
+		{% if error %}
+		<!-- Error -->
+		<div style="background:#1c0e0e; border:1px solid #f85149; border-radius:8px; padding:1rem; margin-top:1rem;">
+			<h4 style="color:#f85149; margin:0 0 0.5rem 0;">Request Failed</h4>
+			<pre style="color:#ffa198; font-size:0.85rem; margin:0; white-space:pre-wrap;">{{ error }}</pre>
+		</div>
+		{% endif %}
+
+		{% if content is not none %}
+		<!-- Response Info -->
+		<div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:10px 14px; margin-top:1rem;">
+			<span style="color:#484f58; font-size:0.75rem; font-family:monospace;">Response:</span>
+			<span style="color:{% if status_code == 200 %}#3fb950{% elif status_code == 302 %}#d29922{% else %}#f85149{% endif %}; font-family:monospace; font-size:0.85rem; margin-left:8px;">
+				{{ status_code }}
+			</span>
+			<span style="color:#484f58; font-family:monospace; font-size:0.85rem; margin-left:12px;">
+				{{ content_length }} bytes
+			</span>
+		</div>
+
+		{% if response_headers %}
+		<!-- Response Headers -->
+		<details style="margin-top:0.5rem;">
+			<summary style="color:#8b949e; cursor:pointer; font-family:monospace; font-size:0.8rem;">Response Headers</summary>
+			<div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:10px; margin-top:4px;">
+				{% for key, value in response_headers.items() %}
+				<div style="font-family:monospace; font-size:0.8rem;">
+					<span style="color:#79c0ff;">{{ key }}</span><span style="color:#484f58;">:</span>
+					<span style="color:#8b949e;">{{ value }}</span>
+				</div>
+				{% endfor %}
+			</div>
+		</details>
+		{% endif %}
+
+		<!-- Content Preview -->
+		<div style="background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:1rem; margin-top:0.5rem; max-height:500px; overflow-y:auto;">
+			<pre style="color:#e6edf3; font-size:0.8rem; margin:0; white-space:pre-wrap; word-break:break-all;">{{ content[:5000] }}{% if content|length > 5000 %}
+
+... (truncated, {{ content|length }} total bytes){% endif %}</pre>
+		</div>
+		{% endif %}
+
+		<!-- Security Warning -->
+		<div style="background:#1c1208; border:1px solid #bb8009; border-radius:8px; padding:1rem; margin-top:2rem;">
+			<h4 style="color:#e3b341; margin:0 0 0.5rem 0;">Security Note</h4>
+			<p style="color:#8b949e; font-size:0.9rem; margin:0;">
+				This endpoint fetches any URL the user provides with no restrictions.
+				An attacker can use it to access internal services (localhost, private IPs),
+				scan the internal network, chain with other vulnerabilities (LFI, SQLi),
+				or read cloud metadata endpoints.
+			</p>
+		</div>
+	</div>
+
+	<script>
+		function toggleSidebar() {
+			document.getElementById('sidebar').classList.toggle('collapsed');
+			document.getElementById('main').classList.toggle('expanded');
+		}
+	</script>
+</body>
+</html>

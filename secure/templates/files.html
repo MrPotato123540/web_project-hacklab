@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Files — Download Center</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+	<div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+
+	<div class="sidebar collapsed" id="sidebar">
+		<br>
+		<ul>
+			<li><a href="{{ url_for('qr_home') }}">QR Generator</a></li>
+			<li><a href="{{ url_for('decode_qr') }}">Qr Decoder</a></li>
+			<li><a href="{{ url_for('list_notes') }}">Markdown Viewer</a></li>
+			<li><a href="{{ url_for('list_files') }}" class="active">Files</a></li>
+			<li><a href="{{ url_for('search') }}">Search</a></li>
+			<li><a href="{{ url_for('ping_tool') }}">Ping</a></li>
+			<li><a href="{{ url_for('preview_url') }}">URL Preview</a></li>
+		    <li style="margin-top:20px;border-top:1px solid #30363d;padding-top:12px;"><a href="{{ url_for('change_password') }}">Settings</a></li>
+		    <li><a href="{{ url_for('logout') }}" style="color:#ff6666;">Logout</a></li>
+		    <li style="color:#6ea8fe;font-size:12px;margin-top:10px;">{{ session.get('username', 'Guest') }}</li>
+		</ul>
+	</div>
+
+	<div class="main-content expanded" id="main">
+		<h2>File Download Center</h2>
+		<p style="color: #8b949e;">Download your files below:</p>
+
+		<div style="margin-top: 1.5rem;">
+			<div style="background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+				<h4 style="color: #c9d1d9; margin: 0 0 0.5rem 0;">Available Files</h4>
+				<ul style="list-style: none; padding: 0;">
+					<li style="padding: 0.4rem 0;">
+						<a href="{{ url_for('download_file', file='readme.txt') }}" style="color: #58a6ff;">readme.txt</a>
+						<span style="color: #484f58; font-size: 0.85rem;"> — Project documentation</span>
+					</li>
+					<li style="padding: 0.4rem 0;">
+						<a href="{{ url_for('download_file', file='notes_backup.txt') }}" style="color: #58a6ff;">notes_backup.txt</a>
+						<span style="color: #484f58; font-size: 0.85rem;"> — Notes backup file</span>
+					</li>
+				</ul>
+			</div>
+
+			<div style="background: #1c1208; border: 1px solid #bb8009; border-radius: 8px; padding: 1rem; margin-top: 2rem;">
+				<h4 style="color: #e3b341; margin: 0 0 0.5rem 0;">Security Note</h4>
+				<p style="color: #8b949e; font-size: 0.9rem; margin: 0;">
+					This endpoint has no path validation. An attacker could use
+					<code style="background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #f85149;">../</code>
+					sequences to read arbitrary files on the server.
+				</p>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		function toggleSidebar() {
+			document.getElementById('sidebar').classList.toggle('collapsed');
+			document.getElementById('main').classList.toggle('expanded');
+		}
+	</script>
+</body>
+</html>

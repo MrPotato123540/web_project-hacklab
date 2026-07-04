@@ -1,0 +1,88 @@
+<!-- VULNERABLE: shows the constructed shell command on the page
+     this confirms to the attacker that their metacharacters were interpreted
+     the secure version removes executed_cmd entirely -->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Network Diagnostics</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+	<div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+
+	<div class="sidebar collapsed" id="sidebar">
+		<br>
+		<ul>
+			<li><a href="{{ url_for('qr_home') }}">QR Generator</a></li>
+			<li><a href="{{ url_for('decode_qr') }}">Qr Decoder</a></li>
+			<li><a href="{{ url_for('list_notes') }}">Markdown Viewer</a></li>
+			<li><a href="{{ url_for('list_files') }}">Files</a></li>
+			<li><a href="{{ url_for('search') }}">Search</a></li>
+			<li><a href="{{ url_for('ping_tool') }}" class="active">Ping</a></li>
+			<li><a href="{{ url_for('preview_url') }}">URL Preview</a></li>
+		    <li style="margin-top:20px;border-top:1px solid #30363d;padding-top:12px;"><a href="{{ url_for('change_password') }}">Settings</a></li>
+		    <li><a href="{{ url_for('logout') }}" style="color:#ff6666;">Logout</a></li>
+		    <li style="color:#6ea8fe;font-size:12px;margin-top:10px;">{{ session.get('username', 'Guest') }}</li>
+		</ul>
+	</div>
+
+	<div class="main-content expanded" id="main">
+		<h2>Network Diagnostics</h2>
+		<p style="color: #8b949e;">Check if a host is reachable by sending ICMP ping packets.</p>
+
+		<!-- Ping Form -->
+		<form method="POST" action="{{ url_for('ping_tool') }}" style="margin-top: 1rem;">
+			<div style="display: flex; gap: 8px;">
+				<input 
+					type="text" 
+					name="host" 
+					value="{{ host or '' }}" 
+					placeholder="Enter hostname or IP (e.g. google.com)"
+					style="flex:1; padding:10px 14px; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#e6edf3; font-family:monospace; font-size:14px;"
+				>
+				<button type="submit" style="padding:10px 20px; background:#238636; color:white; border:none; border-radius:6px; font-family:monospace; font-size:14px; cursor:pointer;">
+					Ping
+				</button>
+			</div>
+		</form>
+
+		{% if executed_cmd %}
+		<!-- Executed Command (debug) -->
+		<div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:10px 14px; margin-top:1rem; overflow-x:auto;">
+			<span style="color:#484f58; font-size:0.75rem; font-family:monospace;">DEBUG — Executed command:</span>
+			<pre style="color:#f0883e; font-size:0.85rem; margin:4px 0 0 0; white-space:pre-wrap;">$ {{ executed_cmd }}</pre>
+		</div>
+		{% endif %}
+
+		{% if output %}
+		<!-- Command Output -->
+		<div style="background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:1rem; margin-top:1rem;">
+			<h4 style="color:#8b949e; margin:0 0 0.5rem 0; font-size:0.85rem;">Output:</h4>
+			<pre style="color:#e6edf3; font-size:0.85rem; margin:0; white-space:pre-wrap; word-break:break-all; max-height:400px; overflow-y:auto;">{{ output }}</pre>
+		</div>
+		{% endif %}
+
+		<!-- Security Warning -->
+		<div style="background:#1c1208; border:1px solid #bb8009; border-radius:8px; padding:1rem; margin-top:2rem;">
+			<h4 style="color:#e3b341; margin:0 0 0.5rem 0;">Security Note</h4>
+			<p style="color:#8b949e; font-size:0.9rem; margin:0;">
+				This endpoint passes user input directly into a shell command via
+				<code style="background:#0d1117; padding:2px 6px; border-radius:3px; color:#f85149;">subprocess.run(cmd, shell=True)</code>.
+				An attacker can use shell metacharacters
+				(<code style="color:#f85149;">;</code> <code style="color:#f85149;">&&</code>
+				<code style="color:#f85149;">||</code> <code style="color:#f85149;">|</code>
+				<code style="color:#f85149;">$()</code>) to execute arbitrary commands.
+			</p>
+		</div>
+	</div>
+
+	<script>
+		function toggleSidebar() {
+			document.getElementById('sidebar').classList.toggle('collapsed');
+			document.getElementById('main').classList.toggle('expanded');
+		}
+	</script>
+</body>
+</html>

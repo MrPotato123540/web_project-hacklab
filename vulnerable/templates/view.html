@@ -1,0 +1,48 @@
+<!-- VULNERABLE: content is rendered with |safe which disables Jinja2 auto-escaping
+     any <script> tags in the markdown note will execute in the viewers browser
+     the secure version runs bleach.clean() before passing content to this template -->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>{{ filename }}</title>
+
+	 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+
+    <div class="sidebar collapsed" id="sidebar">
+            <br>
+            <ul>
+                    <li><a href="{{ url_for('welcome') }}">Home</a></li>
+                    <li><a href="{{ url_for('qr_home') }}">QR Generator</a></li>
+                    <li><a href="{{ url_for('decode_qr') }}">QR Decoder</a></li>
+		    <li><a href="{{ url_for('list_notes') }}">Markdown Viewer</a></li>
+		    <li><a href="{{ url_for('list_files') }}">Files</a></li>
+		    <li><a href="{{ url_for('search') }}">Search</a></li>
+		    <li><a href="{{ url_for('ping_tool') }}">Ping</a></li>
+		    <li><a href="{{ url_for('preview_url') }}">URL Preview</a></li>
+		    <li style="margin-top:20px;border-top:1px solid #30363d;padding-top:12px;"><a href="{{ url_for('change_password') }}">Settings</a></li>
+		    <li><a href="{{ url_for('logout') }}" style="color:#ff6666;">Logout</a></li>
+		    <li style="color:#6ea8fe;font-size:12px;margin-top:10px;">{{ session.get('username', 'Guest') }}</li>
+            </ul>
+    </div>
+
+    <div class="main-content expanded" id="main">
+	<a href="{{ url_for('list_notes') }}">Go Back</a>
+	<hr>
+	<article class="markdown-content">
+		{{ content|safe }}
+	</article>
+    </div>
+
+	<script>
+                function toggleSidebar() {
+                        document.getElementById('sidebar').classList.toggle('collapsed');
+                        document.getElementById('main').classList.toggle('expanded');
+                }
+        </script>
+</body>
+</html>

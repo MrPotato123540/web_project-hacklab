@@ -1,0 +1,54 @@
+<!-- SECURE: CSRF token via csrf_token(), next parameter validated by is_safe_redirect() -->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Login</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+	<div class="login-container">
+		<div class="login-card">
+			<div class="login-header">
+				<h1>DevToolkit <span style="color:#238636;font-size:0.5em;">SECURE</span></h1>
+				<p>Sign in to continue</p>
+			</div>
+
+			{% if error %}
+			<div class="login-error">
+				{{ error }}
+			</div>
+			{% endif %}
+
+			<form method="POST" action="{{ url_for('login') }}" class="login-form">
+				<!-- SECURE: CSRF token -->
+				<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+				<!-- next parametresi hidden field ile tasinir -->
+				<input type="hidden" name="next" value="{{ next_url }}">
+				<div class="form-field">
+					<label for="username">Username</label>
+					<input type="text" id="username" name="username" placeholder="admin" autocomplete="off">
+				</div>
+
+				<div class="form-field">
+					<label for="password">Password</label>
+					<input type="password" id="password" name="password" placeholder="••••••">
+				</div>
+
+				<button type="submit" class="login-btn">Sign In</button>
+			</form>
+
+			<p style="color: #8b949e; text-align: center; margin-top: 1rem; font-size: 0.85rem;">
+   				 Don't have an account? <a href="/register" style="color: #58a6ff;">Register</a>
+			</p>
+
+			<div class="login-hint">
+				<p>Test accounts: <code>admin / admin123</code> or <code>potato / test123</code></p>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

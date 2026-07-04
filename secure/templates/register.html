@@ -1,0 +1,52 @@
+<!-- SECURE: CSRF token, generic error message, input validation -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Register</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 2rem; width: 350px;">
+            <h2 style="color: #c9d1d9; text-align: center; margin-bottom: 1.5rem;">Create Account</h2>
+
+            {% if error %}
+            <div style="background: #3d1214; border: 1px solid #f85149; color: #f85149; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem;">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/register">
+                <!-- SECURE: CSRF token -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div style="margin-bottom: 1rem;">
+                    <label style="color: #8b949e; font-size: 0.85rem; display: block; margin-bottom: 0.3rem;">Username</label>
+                    <input type="text" name="username" required minlength="3" maxlength="30" pattern="[a-zA-Z0-9_]+"
+                        style="width: 100%; padding: 0.6rem; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-size: 1rem; box-sizing: border-box;">
+                    <small style="color:#484f58;font-size:0.75rem;">3-30 characters, letters/numbers/underscores only</small>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="color: #8b949e; font-size: 0.85rem; display: block; margin-bottom: 0.3rem;">Password</label>
+                    <input type="password" name="password" required minlength="8"
+                        style="width: 100%; padding: 0.6rem; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-size: 1rem; box-sizing: border-box;">
+                    <small style="color:#484f58;font-size:0.75rem;">Minimum 8 characters</small>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="color: #8b949e; font-size: 0.85rem; display: block; margin-bottom: 0.3rem;">Confirm Password</label>
+                    <input type="password" name="confirm" required minlength="8"
+                        style="width: 100%; padding: 0.6rem; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-size: 1rem; box-sizing: border-box;">
+                </div>
+                <button type="submit"
+                    style="width: 100%; padding: 0.7rem; background: #238636; border: none; border-radius: 6px; color: white; font-size: 1rem; cursor: pointer; font-weight: 600;">
+                    Register
+                </button>
+            </form>
+
+            <p style="color: #8b949e; text-align: center; margin-top: 1rem; font-size: 0.85rem;">
+                Already have an account? <a href="/login" style="color: #58a6ff;">Login</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

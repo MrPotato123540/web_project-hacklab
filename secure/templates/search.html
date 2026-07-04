@@ -1,0 +1,77 @@
+<!-- SECURE: executed_sql removed, generic error message -->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Search Notes</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+
+    <div class="sidebar collapsed" id="sidebar">
+            <br>
+            <ul>
+                    <li><a href="{{ url_for('welcome') }}">Home</a></li>
+                    <li><a href="{{ url_for('qr_home') }}">QR Generator</a></li>
+                    <li><a href="{{ url_for('decode_qr') }}">QR Decoder</a></li>
+		    <li><a href="{{ url_for('list_notes') }}">Markdown Viewer</a></li>
+		    <li><a href="{{ url_for('list_files') }}">Files</a></li>
+		    <li><a href="{{ url_for('search') }}">Search</a></li>
+		    <li><a href="{{ url_for('ping_tool') }}">Ping</a></li>
+		    <li><a href="{{ url_for('preview_url') }}">URL Preview</a></li>
+		    <li style="margin-top:20px;border-top:1px solid #30363d;padding-top:12px;"><a href="{{ url_for('change_password') }}">Settings</a></li>
+		    <li><a href="{{ url_for('logout') }}" style="color:#ff6666;">Logout</a></li>
+		    <li style="color:#6ea8fe;font-size:12px;margin-top:10px;">{{ session.get('username', 'Guest') }}</li>
+            </ul>
+    </div>
+
+    <div class="main-content expanded" id="main">
+	<h2>Search Notes</h2>
+
+	<form method="GET" action="{{ url_for('search') }}" style="display:flex;gap:8px;margin-bottom:20px;">
+		<input type="text" name="q" value="{{ query or '' }}" placeholder="Search..."
+			style="flex:1;padding:10px 14px;background:#161b22;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-family:monospace;">
+		<button type="submit"
+			style="padding:10px 20px;background:#238636;border:none;border-radius:8px;color:white;font-family:monospace;cursor:pointer;">Search</button>
+	</form>
+
+	{% if query %}
+		<p style="color:#8b949e;font-size:0.9rem;margin-bottom:12px;">
+			Found <strong>{{ result_count }}</strong> result(s) for "{{ query }}"
+		</p>
+
+		<!-- SECURE: executed_sql KALDIRILDI — sorgu yapisi sizdirilmaz -->
+
+		{% if error %}
+		<div style="background:#3d1214;border:1px solid #f85149;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+			<p style="color:#f85149;margin:0;font-size:0.9rem;">An error occurred during search.</p>
+		</div>
+		{% endif %}
+
+		{% if results %}
+		<div style="display:flex;flex-direction:column;gap:12px;">
+			{% for note in results %}
+			<div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:16px;">
+				<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+					<a href="{{ url_for('view_note', note_id=note.id) }}" style="color:#58a6ff;font-weight:600;text-decoration:none;font-size:1.05rem;">{{ note.title }}</a>
+					<span style="font-size:0.75rem;color:#484f58;background:#0d1117;padding:3px 8px;border-radius:12px;">{{ note.category }}</span>
+				</div>
+				<p style="color:#8b949e;font-size:0.85rem;margin:0;line-height:1.5;">
+					{{ note.content[:150] }}{% if note.content|length > 150 %}...{% endif %}
+				</p>
+			</div>
+			{% endfor %}
+		</div>
+		{% endif %}
+	{% endif %}
+    </div>
+
+	<script>
+		function toggleSidebar() {
+			document.getElementById('sidebar').classList.toggle('collapsed');
+			document.getElementById('main').classList.toggle('expanded');
+		}
+	</script>
+</body>
+</html>

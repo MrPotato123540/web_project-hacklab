@@ -1,0 +1,119 @@
+<!-- VULNERABLE: shows the executed SQL query in a debug box on the page
+     this helps attackers understand the query structure and craft payloads
+     the secure version removes executed_sql entirely -->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Search Notes</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+	<div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+
+	<div class="sidebar collapsed" id="sidebar">
+		<br>
+		<ul>
+			<li><a href="{{ url_for('qr_home') }}">QR Generator</a></li>
+			<li><a href="{{ url_for('decode_qr') }}">Qr Decoder</a></li>
+			<li><a href="{{ url_for('list_notes') }}">Markdown Viewer</a></li>
+			<li><a href="{{ url_for('list_files') }}">Files</a></li>
+			<li><a href="{{ url_for('search') }}" class="active">Search</a></li>
+			<li><a href="{{ url_for('ping_tool') }}">Ping</a></li>
+		    <li style="margin-top:20px;border-top:1px solid #30363d;padding-top:12px;"><a href="{{ url_for('change_password') }}">Settings</a></li>
+		    <li><a href="{{ url_for('logout') }}" style="color:#ff6666;">Logout</a></li>
+		    <li style="color:#6ea8fe;font-size:12px;margin-top:10px;">{{ session.get('username', 'Guest') }}</li>
+		</ul>
+	</div>
+
+	<div class="main-content expanded" id="main">
+		<h2>Search Notes</h2>
+		<p style="color: #8b949e;">Search through your notes by title or content.</p>
+
+		<!-- Search Form -->
+		<form method="GET" action="{{ url_for('search') }}" style="margin-top: 1rem;">
+			<div style="display: flex; gap: 8px;">
+				<input 
+					type="text" 
+					name="q" 
+					value="{{ query or '' }}" 
+					placeholder="Search notes..."
+					style="flex:1; padding:10px 14px; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#e6edf3; font-family:monospace; font-size:14px;"
+				>
+				<button type="submit" style="padding:10px 20px; background:#238636; color:white; border:none; border-radius:6px; font-family:monospace; font-size:14px; cursor:pointer;">
+					Search
+				</button>
+			</div>
+		</form>
+
+		{% if query %}
+		<!-- Result Count -->
+		<p style="color:#8b949e; margin-top:1rem; font-size:0.9rem;">
+			Found <strong style="color:#e6edf3;">{{ result_count }}</strong> result(s) for "<strong style="color:#58a6ff;">{{ query }}</strong>"
+		</p>
+
+		<!-- Executed SQL (debug — gercek uygulamada ASLA gosterilmez) -->
+		{% if executed_sql %}
+		<div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:10px 14px; margin-top:1rem; overflow-x:auto;">
+			<span style="color:#484f58; font-size:0.75rem; font-family:monospace;">DEBUG — Executed SQL:</span>
+			<pre style="color:#f0883e; font-size:0.85rem; margin:4px 0 0 0; white-space:pre-wrap; word-break:break-all;">{{ executed_sql }}</pre>
+		</div>
+		{% endif %}
+
+		<!-- Error Message (SQL hata detaylarini sizdiriyor) -->
+		{% if error %}
+		<div style="background:#1c0e0e; border:1px solid #f85149; border-radius:8px; padding:1rem; margin-top:1rem;">
+			<h4 style="color:#f85149; margin:0 0 0.5rem 0;">Database Error</h4>
+			<pre style="color:#ffa198; font-size:0.85rem; margin:0; white-space:pre-wrap;">{{ error }}</pre>
+		</div>
+		{% endif %}
+
+		<!-- Results -->
+		{% if results %}
+		<div style="margin-top:1.5rem;">
+			{% for row in results %}
+			<div style="background:#161b22; border:1px solid #21262d; border-radius:8px; padding:1rem; margin-bottom:0.75rem;">
+				<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+					<h3 style="color:#e6edf3; margin:0; font-size:1rem;">
+						<span style="color:#484f58; font-size:0.8rem;">#{{ row[0] }}</span>
+						{{ row[1] }}
+					</h3>
+					<span style="background:#30363d; color:#8b949e; padding:2px 8px; border-radius:10px; font-size:0.75rem;">{{ row[3] }}</span>
+				</div>
+				<p style="color:#8b949e; font-size:0.9rem; margin:0;">
+					{{ row[2][:200] }}{% if row[2]|length > 200 %}…{% endif %}
+				</p>
+				{% if row[4] %}
+				<span style="color:#484f58; font-size:0.75rem;">{{ row[4] }}</span>
+				{% endif %}
+			</div>
+			{% endfor %}
+		</div>
+		{% elif not error %}
+		<div style="text-align:center; padding:3rem; color:#484f58;">
+			<p style="font-size:1.5rem;">🔍</p>
+			<p>No results found.</p>
+		</div>
+		{% endif %}
+		{% endif %}
+
+		<!-- Security Warning -->
+		<div style="background:#1c1208; border:1px solid #bb8009; border-radius:8px; padding:1rem; margin-top:2rem;">
+			<h4 style="color:#e3b341; margin:0 0 0.5rem 0;">Security Note</h4>
+			<p style="color:#8b949e; font-size:0.9rem; margin:0;">
+				This search endpoint uses raw SQL with string interpolation instead of
+				parameterized queries. An attacker can inject SQL commands through the
+				search field to read, modify, or delete any data in the database.
+			</p>
+		</div>
+	</div>
+
+	<script>
+		function toggleSidebar() {
+			document.getElementById('sidebar').classList.toggle('collapsed');
+			document.getElementById('main').classList.toggle('expanded');
+		}
+	</script>
+</body>
+</html>
