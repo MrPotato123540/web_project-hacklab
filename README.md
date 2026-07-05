@@ -29,7 +29,7 @@ A security education platform built around a real Flask application.
   - [5. Path Traversal / LFI](#5-path-traversal--local-file-inclusion-lfi)
   - [6. SSRF](#6-server-side-request-forgery-ssrf)
   - [7. Session Cookie Forgery](#7-session-cookie-forgery)
-  - [8. Werkzeug Debug PIN → RCE](#8-werkzeug-debug-pin--rce)
+  - [8. Werkzeug Debug PIN -> RCE](#8-werkzeug-debug-pin--rce)
   - [9. Stored XSS](#9-stored-cross-site-scripting-xss)
   - [10. CSRF](#10-cross-site-request-forgery-csrf)
   - [11. Open Redirect](#11-open-redirect)
